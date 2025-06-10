@@ -3,7 +3,7 @@ FROM python:3.13-slim-bookworm AS base
 ENV PYTHONUNBUFFERED=1 \
     PYTHONFAULTHANDLER=1
 
-WORKDIR /src
+WORKDIR /app
 
 FROM base AS builder
 
@@ -25,13 +25,15 @@ FROM base AS final
 
 RUN adduser -u 1000 python
 
+RUN chown -R python:python /app
+
 USER python
 
 ENV DEBUG=false \
     UVICORN_HOST="0.0.0.0" \
     UVICORN_PORT="8000"
 
-COPY --from=builder /src/.venv ./.venv
+COPY --from=builder /app/.venv ./.venv
 COPY main.py .
 
-ENTRYPOINT ["/src/.venv/bin/uvicorn", "main:app", "--reload"]
+ENTRYPOINT ["/app/.venv/bin/uvicorn", "main:app", "--reload"]

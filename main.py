@@ -29,7 +29,7 @@ def get_codes_from_fastapi():
         return []
 
 
-IMAGES_DIR = Path.home() / "images"
+IMAGES_DIR = Path("/app/images")
 IMAGES_DIR.mkdir(exist_ok=True)
 
 @app.get("/")
