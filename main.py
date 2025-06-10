@@ -1,9 +1,10 @@
 import logging
 import random
+from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException, status
-from fastapi.responses import Response
+from fastapi.responses import FileResponse
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -28,11 +29,24 @@ def get_codes_from_fastapi():
         return []
 
 
+IMAGES_DIR = Path.home() / "images"
+IMAGES_DIR.mkdir(exist_ok=True)
+
 @app.get("/")
 async def get_capybara():
     random_code = random.choice(get_codes_from_fastapi())
 
-    url = f"https://capy.codes/{str(random_code)}.jpg"
+    filename = f"capybara_{random_code}.jpg"
+    filepath = IMAGES_DIR / filename
+
+    # Check if file already exists
+    if filepath.exists():
+        logger.info(f"Using cached image: {filepath}")
+        return FileResponse(
+            path=str(filepath), media_type="image/jpeg", filename=filename
+        )
+
+    url = f"https://capy.codes/{random_code}.jpg"
     logger.info(f"Fetching capybara image from: {url}")
 
     try:
@@ -40,14 +54,11 @@ async def get_capybara():
             response = await client.get(url)
 
             if response.status_code == 200:
-                logger.info(f"Successfully fetched image for code {random_code}")
-                return Response(
-                    content=response.content,
-                    media_type="image/jpeg",
-                    headers={
-                        "Content-Disposition": f"inline; filename=capybara_{random_code}.jpg"
-                    },
-                )
+                with open(filepath, "wb") as f:
+                    f.write(response.content)
+                logger.info(f"Image saved and serving: {filepath}")
+
+                return FileResponse(path=str(filepath), media_type="image/jpeg", filename=filename)
             else:
                 logger.warning(
                     f"Failed to fetch image for code {random_code}. Status: {response.status_code}"
