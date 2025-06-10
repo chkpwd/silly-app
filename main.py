@@ -4,7 +4,7 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException, status
-from fastapi.responses import FileResponse
+from fastapi.responses import Response
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -42,9 +42,7 @@ async def get_capybara():
     # Check if file already exists
     if filepath.exists():
         logger.info(f"Using cached image: {filepath}")
-        return FileResponse(
-            path=str(filepath), media_type="image/jpeg", filename=filename
-        )
+        return Response(content=filepath.read_bytes(), media_type="image/jpeg")
 
     url = f"https://capy.codes/{random_code}.jpg"
     logger.info(f"Fetching capybara image from: {url}")
@@ -58,7 +56,7 @@ async def get_capybara():
                     f.write(response.content)
                 logger.info(f"Image saved and serving: {filepath}")
 
-                return FileResponse(path=str(filepath), media_type="image/jpeg", filename=filename)
+                return Response(content=response.content, media_type="image/jpeg")
             else:
                 logger.warning(
                     f"Failed to fetch image for code {random_code}. Status: {response.status_code}"
