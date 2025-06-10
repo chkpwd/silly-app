@@ -25,10 +25,6 @@ poetry install
 uvicorn main:app --reload
 ```
 
-### Docker
-
-Container runs on port 8000 by default.
-
 ### Endpoints
 
 - `GET /` - Returns a random capybara image
