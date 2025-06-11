@@ -25,7 +25,9 @@ FROM base AS final
 
 RUN adduser -u 1000 python
 
-RUN chown -R python:python /app/images
+RUN \
+    mkdir -p /app/images && \
+    chown -R python:python /app/images
 
 USER python
 

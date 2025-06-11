@@ -30,7 +30,6 @@ def get_codes_from_fastapi():
 
 
 IMAGES_DIR = Path("/app/images")
-IMAGES_DIR.mkdir(exist_ok=True)
 
 @app.get("/")
 async def get_capybara():
